@@ -7,13 +7,21 @@ source "$SCRIPT_DIR/common.sh"
 # Read hook JSON from stdin
 RAW=$(cat)
 
-# Only notify for actionable types (permission prompts, input dialogs)
-# Skip idle_prompt (fires on task complete — not actually waiting for input)
+# Only notify for actionable types (permission prompts, input dialogs, task completion)
+# Stop hook has no notification_type; fall back to hook_event_name ("Stop")
 NOTIF_TYPE=$(echo "$RAW" | json_val "notification_type")
+if [ -z "$NOTIF_TYPE" ]; then
+    NOTIF_TYPE=$(echo "$RAW" | json_val "hook_event_name")
+fi
 case "$NOTIF_TYPE" in
-    permission_prompt|elicitation_dialog) ;;
+    permission_prompt|elicitation_dialog|Stop) ;;
     *) exit 0 ;;
 esac
+
+# Stop events carry no message; give the notification a sensible body
+if [ "$NOTIF_TYPE" = "Stop" ] && [ -z "$(echo "$RAW" | json_val "message")" ]; then
+    RAW=$(echo "$RAW" | json_set "message" "✅ 任务完成")
+fi
 
 TRANSCRIPT=$(echo "$RAW" | json_val "transcript_path")
 
