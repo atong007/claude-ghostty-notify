@@ -29,7 +29,7 @@ sleep 3
 # Check if Ghostty is focused AND the active tab is THIS session's terminal
 SESSION_ID=$(echo "$RAW" | json_val "session_id")
 FRONTMOST=$(osascript -e 'tell application "System Events" to get name of first application process whose frontmost is true' 2>/dev/null || true)
-if [ "${FRONTMOST,,}" = "ghostty" ]; then
+if [ "$(printf '%s' "$FRONTMOST" | tr '[:upper:]' '[:lower:]')" = "ghostty" ]; then
     # Check by terminal UUID from SQLite store
     ensure_db
     SAVED_TID=$(sqlite3 "$NOTIFY_DB" "SELECT terminal_uuid FROM sessions WHERE session_id = '$SESSION_ID';" 2>/dev/null || true)
