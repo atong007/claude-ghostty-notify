@@ -280,8 +280,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             }
         }
 
-        // Auto-exit after 30s if no click
-        DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+        // Auto-exit after 1h if no click (30s was too short: notifications clicked
+        // from Notification Center after that hit a dead app and did nothing)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3600) {
             NSApp.terminate(nil)
         }
     }
